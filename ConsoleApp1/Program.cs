@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
 using Microsoft.Azure.Cosmos;
@@ -14,7 +13,7 @@ namespace ConsoleApp1
     {
         private static string connectionString = "cosmosDBConnection";
         private static string databaseName = "VolcanoList";
-        private static string containerName = "Volcano2";
+        private static string containerName = "Volcano";
         private static string fileName = "sampleData.json";
 
         static async Task Main(string[] args)
@@ -40,11 +39,10 @@ namespace ConsoleApp1
 
         private static async Task BulkUploadDataToCosmosDB(List<Volcano> data, Container container)
         {
-            if (data.Count == 0)
+            if (data == null || data.Count == 0)
             {
                 return;
             }
-
             
             List<Task> tasks = new List<Task>(data.Count);
             foreach (var volcano in data)
