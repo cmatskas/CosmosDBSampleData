@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Azure.Identity;
 using Bogus;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
@@ -20,11 +21,13 @@ namespace ConsoleApp1
         {
             var config = BootstrapConfiguration();
 
+            var credential = new DefaultAzureCredential();
+            
             Console.WriteLine("Initializing Cosmos DB connection");
-            var cosmosClient = new CosmosClient(config[connectionString]);
-            var db = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-            var container = await db.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
-
+            var cosmosClient = new CosmosClient(config[connectionString], credential);
+            var db = cosmosClient.GetDatabase(databaseName);
+            var container = db.GetContainer(containerName);
+            
             Console.WriteLine("Loading data from json file");
             var data = await GetJsonDataAsync();
 
@@ -32,7 +35,7 @@ namespace ConsoleApp1
             PopulateMeasurementData(ref data);
 
             Console.WriteLine("Bulk uploading data to Cosmos DB");
-            await BulkUploadDataToCosmosDB(data, container.Container);
+            await BulkUploadDataToCosmosDB(data, container);
        
             Console.WriteLine("Execution completed");
         }
